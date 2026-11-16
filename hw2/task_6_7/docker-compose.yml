@@ -1,0 +1,26 @@
+
+services:
+  producer:
+    build: ./producer
+    ports:
+      - "8000:8000"
+    networks:
+      - demo-network
+    volumes:
+      - shared-data:/shared
+
+  consumer:
+    build: ./consumer
+    depends_on:
+      - producer
+    networks:
+      - demo-network
+    volumes:
+      - shared-data:/shared:ro
+
+networks:
+  demo-network:
+    driver: bridge
+
+volumes:
+  shared-data:
