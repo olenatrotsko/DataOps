@@ -1,0 +1,14 @@
+services:
+  chatbot:
+    build: .
+    image: streamlit-chatbot:latest
+    ports:
+      - "8050:8050"
+    depends_on:
+      - llm
+
+  llm:
+    provider:
+      type: model
+      options:
+        model: ai/llama3.2
