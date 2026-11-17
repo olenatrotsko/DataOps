@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: web
+  template:
+    metadata:
+      labels:
+        app: web
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:stable
+          ports:
+            - containerPort: 80
+          env:
+            - name: FLASK_SERVER_ADDR
+              value: backend:9091
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              envsubst '${FLASK_SERVER_ADDR}' < /tmp/nginx.conf > /etc/nginx/conf.d/default.conf
+              exec nginx -g 'daemon off;'
+          volumeMounts:
+            - name: nginx-config
+              mountPath: /tmp/nginx.conf
+              subPath: nginx.conf
+              readOnly: true
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 80
+            initialDelaySeconds: 2
+            periodSeconds: 5
+      volumes:
+        - name: nginx-config
+          configMap:
+            name: nginx-config
